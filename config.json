@@ -1,5 +1,5 @@
 {
-  "data_location": "../dat/",
+  "data_location": "dat/",
   "cofog_dataset": "oecd_cofog.csv",
   "happiness_dataset": "world_happiness_report.csv",
   "total_spending_dataset": "total_spending.csv"
