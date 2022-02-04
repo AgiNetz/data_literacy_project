@@ -10,7 +10,8 @@ def get_country_name(code):
 def load_data(config):
     return_columns = [
         "Country code", "Country", "Function code", "Function", "Year",
-        'Percentage of total expenditure', 'Expenditure per capita (1000s USD)', 'Happiness score'
+        'Percentage of total expenditure', 'Total expenditure per capita (1000s USD)§',
+        'Expenditure per capita (1000s USD)', 'Happiness score'
     ]
     data_path = config["data_location"]
     cofog = pd.read_csv(data_path + config["cofog_dataset"])
