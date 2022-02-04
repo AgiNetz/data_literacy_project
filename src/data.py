@@ -10,7 +10,7 @@ def get_country_name(code):
 def load_data(config):
     return_columns = [
         "Country code", "Country", "Function code", "Function", "Year",
-        'Percentage of total expenditure', 'Total expenditure per capita (1000s USD)§',
+        'Percentage of total expenditure', 'Total expenditure per capita (1000s USD)',
         'Expenditure per capita (1000s USD)', 'Happiness score'
     ]
     data_path = config["data_location"]
@@ -43,3 +43,6 @@ def load_data(config):
     # Merge in happiness scores
     happiness = happiness.rename(columns={"Country name": "Country", "year": "Year", "Life Ladder": "Happiness score"})
     return pd.merge(cofog_merged, happiness, on=["Country", "Year"])[return_columns]
+
+def filter_bad_data(data):
+    pass
