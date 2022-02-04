@@ -73,3 +73,22 @@ def filter_bad_data(data):
     assert not (data[essential_columns] <= 0).any().any()
     assert not (data[non_negative_columns] < 0).any().any()
     return data
+
+
+def create_samples(data):
+    """Transforms data into samples with expenditures for each function as a column
+
+    Return a tuple - first element has 'Percentage of total expenditure' as features values, second has
+    'Expenditure per capita (1000s USD).'"""
+    def make_samples(value_column):
+        # Make Function Code values into columns
+        pivoted = data.pivot(index=['Country', 'Year'], columns=['Function code'], values=[value_column])
+
+        # Clean up structure
+        pivoted.columns = pivoted.columns.get_level_values(1)
+        pivoted = pivoted.reset_index()
+        pivoted.columns.name = None
+
+        return pd.merge(pivoted, data[['Country', 'Year', 'Happiness score']].drop_duplicates(), on=['Country', 'Year'])
+
+    return make_samples('Percentage of total expenditure'), make_samples('Expenditure per capita (1000s USD)')
