@@ -89,6 +89,8 @@ def create_samples(data):
         pivoted = pivoted.reset_index()
         pivoted.columns.name = None
 
-        return pd.merge(pivoted, data[['Country', 'Year', 'Happiness score']].drop_duplicates(), on=['Country', 'Year'])
+        return pd.merge(pivoted, data[
+            ['Country', 'Year', 'Total expenditure per capita (1000s USD)', 'Happiness score']
+        ].drop_duplicates(), on=['Country', 'Year'])
 
     return make_samples('Percentage of total expenditure'), make_samples('Expenditure per capita (1000s USD)')
