@@ -8,7 +8,7 @@ def get_country_name(code):
     return country.name if country else None
 
 
-def load_data(config):
+def load_data(config, get_top_level_categories=False):
     return_columns = [
         "Country code", "Country", "Function code", "Function", "Year",
         'Percentage of total expenditure', 'Total expenditure per capita (1000s USD)',
@@ -21,12 +21,17 @@ def load_data(config):
 
     # Normalize OECD data to percentages of total instead of millions
 
-    # Filter out only sub-categories, as categories are sum of subcategories
     cofog.rename(columns={
         "LOCATION": "Country code",
         "ACTIVITY": "Function code"
     }, inplace=True)
-    cofog = cofog[cofog["Function code"].str.len() > 3]
+    if get_top_level_categories:
+        cofog = cofog[cofog["Function code"].str.len() == 3]
+    else:
+        cofog = cofog[cofog["Function code"].str.len() > 3]
+
+    # Clean-up - null negative expenditures before, which don't make sense, before summing
+    cofog.loc[cofog['Value'] < 0, 'Value'] = 0
     totals = cofog.groupby(["Country", "Year"], as_index=False)["Value"].sum()
 
     cofog = pd.merge(cofog, totals, on=["Country", "Year"])
@@ -63,15 +68,9 @@ def filter_bad_data(data):
     data = data[(data[essential_columns] > 0).any(axis=1)]
     logging.info("Dropped {n} rows with invalid essential columns".format(n=data_rows_cnt - len(data.index)))
 
-    # Null any negative values in partial expenditures - the negative values close to 0 anyway, so this is ok
-    negative_rows = (data[non_negative_columns] < 0).any(axis=1)
-    data.loc[negative_rows, non_negative_columns] = 0
-    logging.info("Nulled non-essential negative columns in {n} rows".format(n=negative_rows.sum()))
-
     assert not data.isnull().any().any()
     assert not (data == "").any().any()
     assert not (data[essential_columns] <= 0).any().any()
-    assert not (data[non_negative_columns] < 0).any().any()
     return data
 
 
@@ -88,6 +87,9 @@ def create_samples(data):
         pivoted.columns = pivoted.columns.get_level_values(1)
         pivoted = pivoted.reset_index()
         pivoted.columns.name = None
+
+        # Missing Country, Year, Function code combinations get nulled
+        pivoted = pivoted.where(~pivoted.isnull(), 0)
 
         return pd.merge(pivoted, data[
             ['Country', 'Year', 'Total expenditure per capita (1000s USD)', 'Happiness score']
