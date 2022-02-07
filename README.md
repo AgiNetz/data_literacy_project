@@ -8,7 +8,7 @@ The goal of the project is to predict happiness scores as defined by the world h
 # Installation
 1. Create a new python virtual environment
 2. pip install -r requirements.txt 
-3. Run any of the notebook in /exp
+3. Run any of the notebooks in /exp
 
 
 # Structure
